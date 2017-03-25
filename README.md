@@ -6,26 +6,24 @@ A demo of the [contextMenus API](https://developer.mozilla.org/en-US/Add-ons/Web
 
 ## What it does
 
-This add-on adds several items to the browser's context menu:
+This add-on adds several items to the browser's context menu, items is shown in all contexts:
 
-* one shown when there is a selection in the page, that logs the selected text
-to the browser console when clicked.
-* one shown in all contexts, that is removed when clicked.
-* two "radio" items that are shown in all contexts.
-These items are grouped using a separator item on each side.
-One radio item adds a blue border to the page, the other adds a green border.
+* Clicking on 'Last Hour' clears browsing history from past hour.
+* Clicking on 'Last Day' clears browsing history from past day.
+* Clicking on 'Last Week' clears browsing history from past week.
+* Clicking on 'Forever' clears your browsing history since the Earth came into existence :P.
+* There is one checkbox item, separated by using 'separator item', which you can select where your want to clear your downloads data or not.
+  If checked, it will clear your history as well as downloads data for any selection you make. 
+  
 Note that these buttons only work on normal web pages, not special pages
 like about:debugging.
-* one "checkbox" item, shown in all contexts, whose title is updated when the
-item is clicked.
 
 ## What it shows
 
 * How to create various types of context menu item:
   * normal
-  * radio
   * separator
   * checkbox
 * How to use contexts to control when an item appears.
 * How to update an item's properties.
-* How to remove an item.
+* How to clear browsing data of user on click
