@@ -1,42 +1,42 @@
 {
   "extensionName": {
-    "message": "Context menu demo",
+    "message": "Context menu and browsing data API demo",
     "description": "Name of the extension."
   },
 
   "extensionDescription": {
-    "message": "Demonstrates the contextMenus API.",
+    "message": "Demonstrates the contextMenus, browsingData APIs.",
     "description": "Description of the add-on."
   },
 
-  "contextMenuItemSelectionLogger": {
-    "message": "Log '%s' to the browser console",
-    "description": "Title of context menu item that logs the selected text when clicked."
+  "contextMenuItemLastHour": {
+    "message": "Last hour",
+    "description": "Title of context menu item that removes history from last hour when clicked."
   },
 
-  "contextMenuItemRemoveMe": {
-    "message": "Remove me!",
-    "description": "Title of context menu item that removes itself when clicked."
+  "contextMenuItemLastDay": {
+    "message": "Last Day",
+    "description": "Title of context menu item that removes history from last day when clicked."
   },
 
-  "contextMenuItemGreenify": {
-    "message": "Greenify",
-    "description": "Title of context menu item that adds a green border when clicked."
+  "contextMenuItemLastWeek": {
+    "message": "Last Week",
+    "description": "Title of context menu item that removes history from last week when clicked."
   },
 
-  "contextMenuItemBluify": {
-    "message": "Bluify",
-    "description": "Title of context menu item that adds a green border when clicked."
+  "contextMenuItemForever": {
+    "message": "Since Earth came into existence!",
+    "description": "Title of context menu item that removes history since earth came into existence when clicked."
   },
 
-  "contextMenuItemCheckMe": {
-    "message": "Check me",
-    "description": "Title of context menu item when the item is checked."
+  "contextMenuItemCheckDownloads": {
+    "message": "Don't Clear Downloads",
+    "description": "Title of context menu item when the clear downloads item is checked."
   },
 
-  "contextMenuItemUncheckMe": {
-    "message": "Uncheck me",
-    "description": "Title of context menu item when the item is unchecked."
+  "contextMenuItemUncheckDownloads": {
+    "message": "Clear downloads",
+    "description": "Title of context menu item when the clear downloads item is unchecked."
   }
 
 }

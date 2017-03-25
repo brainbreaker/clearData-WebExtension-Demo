@@ -10,12 +10,16 @@ function onCreated(n) {
   }
 }
 
+var selectedItem = {
+  since: "hour",
+  dataTypes: ["history", "downloads"]
+};
+
 /*
-Called when the item has been removed.
-We'll just log success here.
+Generic error logger.
 */
-function onRemoved() {
-  console.log("Item removed successfully");
+function onError(e) {
+  console.error(e);
 }
 
 /*
@@ -27,17 +31,82 @@ function onError(error) {
 }
 
 /*
+Forget browsing data, according to the settings passed in
+*/
+function forget(selectionItem) {
+
+  /*
+  Convert from a string to a time.
+  The string is one of: "hour", "day", "week", "forever".
+  The time is given in milliseconds since the epoch.
+  */
+  function getSince(selectedSince) {
+    if (selectedSince === "forever") {
+      return 0;
+    }
+
+    const times = {
+      hour: () => { return 1000 * 60 * 60 },
+      day: () => { return 1000 * 60 * 60 * 24 },
+      week: () => { return 1000 * 60 * 60 * 24 * 7}
+    }
+
+    const sinceMilliseconds = times[selectedSince].call();
+    return Date.now() - sinceMilliseconds;
+  }
+
+  /*
+  Convert from an array of strings, representing data types,
+  to an object suitable for passing into browsingData.remove().
+  */
+  function getTypes(selectedTypes) {
+    let dataTypes = {};
+    for (let item of selectedTypes) {
+      dataTypes[item] = true;
+    }
+    return dataTypes;
+  }
+
+  const since = getSince(selectionItem.since);
+  const dataTypes = getTypes(selectionItem.dataTypes);
+
+  function notify() {
+    let dataTypesString = Object.keys(dataTypes).join(", ");
+    let sinceString = new Date(since).toLocaleString();
+    browser.notifications.create({
+      "type": "basic",
+      "title": "Removed browsing data",
+      "message": `Removed ${dataTypesString}\nsince ${sinceString}`
+    });
+  }
+
+  browser.browsingData.remove({since}, dataTypes).then(notify);
+}
+
+/*
 Create all the context menu items.
 */
 browser.contextMenus.create({
-  id: "log-selection",
-  title: browser.i18n.getMessage("contextMenuItemSelectionLogger"),
-  contexts: ["selection"]
+  id: "last-hour",
+  title: browser.i18n.getMessage("contextMenuItemLastHour"),
+  contexts: ["all"]
 }, onCreated);
 
 browser.contextMenus.create({
-  id: "remove-me",
-  title: browser.i18n.getMessage("contextMenuItemRemoveMe"),
+  id: "last-day",
+  title: browser.i18n.getMessage("contextMenuItemLastDay"),
+  contexts: ["all"]
+}, onCreated);
+
+browser.contextMenus.create({
+  id: "last-week",
+  title: browser.i18n.getMessage("contextMenuItemLastWeek"),
+  contexts: ["all"]
+}, onCreated);
+
+browser.contextMenus.create({
+  id: "forever",
+  title: browser.i18n.getMessage("contextMenuItemForever"),
   contexts: ["all"]
 }, onCreated);
 
@@ -47,52 +116,16 @@ browser.contextMenus.create({
   contexts: ["all"]
 }, onCreated);
 
-browser.contextMenus.create({
-  id: "greenify",
-  type: "radio",
-  title: browser.i18n.getMessage("contextMenuItemGreenify"),
-  contexts: ["all"],
-  checked: true
-}, onCreated);
-
-browser.contextMenus.create({
-  id: "bluify",
-  type: "radio",
-  title: browser.i18n.getMessage("contextMenuItemBluify"),
-  contexts: ["all"],
-  checked: false
-}, onCreated);
-
-browser.contextMenus.create({
-  id: "separator-2",
-  type: "separator",
-  contexts: ["all"]
-}, onCreated);
-
 var checkedState = true;
 
 browser.contextMenus.create({
-  id: "check-uncheck",
+  id: "check-uncheck-downloads",
   type: "checkbox",
-  title: browser.i18n.getMessage("contextMenuItemUncheckMe"),
+  title: browser.i18n.getMessage("contextMenuItemUncheckDownloads"),
   contexts: ["all"],
   checked: checkedState
 }, onCreated);
 
-/*
-Set a colored border on the document in the given tab.
-
-Note that this only work on normal web pages, not special pages
-like about:debugging.
-*/
-var blue = 'document.body.style.border = "5px solid blue"';
-var green = 'document.body.style.border = "5px solid green"';
-
-function borderify(tabId, color) {
-  browser.tabs.executeScript(tabId, {
-    code: color
-  });
-}
 
 /*
 Toggle checkedState, and update the menu item's title
@@ -105,12 +138,14 @@ property into the event listener.
 function updateCheckUncheck() {
   checkedState = !checkedState;
   if (checkedState) {
-    browser.contextMenus.update("check-uncheck", {
-      title: browser.i18n.getMessage("contextMenuItemUncheckMe"),
+    selectedItem.dataTypes = ["history", "downloads"];
+    browser.contextMenus.update("check-uncheck-downloads", {
+      title: browser.i18n.getMessage("contextMenuItemUncheckDownloads"),
     });
   } else {
-    browser.contextMenus.update("check-uncheck", {
-      title: browser.i18n.getMessage("contextMenuItemCheckMe"),
+    selectedItem.dataTypes = ["history"];
+    browser.contextMenus.update("check-uncheck-downloads", {
+      title: browser.i18n.getMessage("contextMenuItemCheckDownloads"),
     });
   }
 }
@@ -121,21 +156,33 @@ ID of the menu item that was clicked.
 */
 browser.contextMenus.onClicked.addListener(function(info, tab) {
   switch (info.menuItemId) {
-    case "log-selection":
-      console.log(info.selectionText);
+    case "last-hour":
+      selectedItem.since = "hour";
+      forget(selectedItem);
+      console.log("Hour history deleted");
+      console.log(selectedItem);
       break;
-    case "remove-me":
-      var removing = browser.contextMenus.remove(info.menuItemId);
-      removing.then(onRemoved, onError);
+    case "last-day":
+      selectedItem.since = "day";
+      forget(selectedItem);
+      console.log("Last Day history deleted");
+      console.log(selectedItem);
       break;
-    case "bluify":
-      borderify(tab.id, blue);
+    case "last-week":
+      selectedItem.since = "week";
+      forget(selectedItem);
+      console.log("Last Week history deleted");
+      console.log(selectedItem);
       break;
-    case "greenify":
-      borderify(tab.id, green);
+    case "forever":
+      selectedItem.since = "forever";
+      forget(selectedItem);
+      console.log("Forever history deleted");
+      console.log(selectedItem);
       break;
     case "check-uncheck":
       updateCheckUncheck();
+      console.log(selectedItem);
       break;
   }
 });
